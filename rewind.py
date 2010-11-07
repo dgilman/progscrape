@@ -318,9 +318,10 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 if __name__ == '__main__':
       server_class = BaseHTTPServer.HTTPServer
       httpd = server_class(('', PORT_NUMBER), MyHandler)
+      print "rewind.py [--faggot-dates] [--port=n] [prog.db]"
+      print "Browse to http://localhost:%d/" % PORT_NUMBER
+      print "It may take 20 seconds or more to generate the front page."
       try:
-         print "Browse to http://localhost:%d/" % PORT_NUMBER 
-         print "It may take 20 seconds or more to generate the front page."
          httpd.serve_forever()
       except KeyboardInterrupt:
          pass
