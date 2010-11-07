@@ -11,6 +11,7 @@ import operator
 
 PORT_NUMBER = 8080
 FAGGOT_DATES = False
+db_name = None
 
 try:
    optlist, args = getopt(sys.argv[1:], '', ['faggot-dates', 'port='])
@@ -23,6 +24,12 @@ for (opt, arg) in optlist:
       FAGGOT_DATES = True
    if opt == '--port':
       PORT_NUMBER = int(arg)
+
+if len(args) > 0:
+   db_name = args[0]
+elif not db_name:
+   db_name = "prog.db"
+
 
 if FAGGOT_DATES:
    date_format = "%d %m %Y %H %M %S"
@@ -39,12 +46,12 @@ ba_gif = base64.b64decode("R0lGODlhPAA8AJEAANzAptCznMWtmbOekiH5BAQUAP8ALAAAAAA8A
 def generate_thread(board):
    fp = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><title>4chan BBS - Programming</title>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>4chan BBS - %s</title>
 <link rel="stylesheet" href="/global.css" />
 <link rel="stylesheet" href="/0ch.css" title="Pseud0ch" media="screen"/>
 </head>
 <body class="read">
-"""
+""" % (board.threads[0][1].title)
    fp += """<h2>%s</h2><div class="thread">""" % (board.threads[0][1].title)
    for post in board:
       for x in range(board.threads[0][1].count):
@@ -126,7 +133,7 @@ def generate_fp(board):
               fp += """</blockquote></p></div>"""
         else:
            fp += """<p class="hidden">The 5 newest replies are shown below.<br/>"""
-           fp += """<a href="read/prog/%d/1-40">Read this thread from the beginning</a></p>""" % (thread[0])
+           fp += """<a href="read/prog/%d/">Read this thread from the beginning</a></p>""" % (thread[0])
            for y in range(len(thread[1].posts)-4,len(thread[1].posts)):
               fp += """<div class="post %s">""" % ( "even" if thread[1].posts[y].count % 2 == 1 else "odd") 
               fp += """<h3><span class="postnum">%d """ % (thread[1].posts[y].count)
@@ -136,9 +143,7 @@ def generate_fp(board):
               fp += """<blockquote><p>"""
               fp += """%s""" % (thread[1].posts[y].body)
               fp += """</blockquote></p></div>"""
-     
-            
-       
+        fp += """<a href="read/prog/%d/">Entire thread</a></p>""" % (thread[0]) 
         fp += """</div></div>"""
         x += 1
       else: pass
@@ -153,7 +158,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
    def do_GET(s):
       """Respond to a GET request."""
 
-      con = sqlite3.connect("prog.db")
+      con = sqlite3.connect(db_name)
+
+      arg_list = s.path.split("/")[1:]
 
       if s.path == "/ba.gif":
          s.send_response(200)
@@ -162,22 +169,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          s.wfile.write(ba_gif)
          return
 
-      s.send_response(200)
-      s.send_header("Content-type", "text/html")
-      s.end_headers()
-      s.wfile.write("<html><head><title>Title goes here.</title></head>")
-      arg_list = s.path.split("/")[1:]
-
       if arg_list[0] == "0ch.css":
+         s.send_response(200)
+         s.send_header("Content-type", "text/css")
+         s.end_headers()
          s.wfile.write(och_css)
          return
       
       if arg_list[0] == "global.css":
+         s.send_response(200)
+         s.send_header("Content-type", "text/css")
+         s.end_headers()
          s.wfile.write(global_css)
          return
 
+      s.send_response(200)
+      s.send_header("Content-type", "text/html")
+      s.end_headers()
+
       if arg_list == [''] or len(arg_list) < 6:
-         s.wfile.write("lol need args")
+         s.wfile.write("Need more arguments!  URLs are in the format http://localhost:%d/%s" % (PORT_NUMBER, date_format.replace(" ", "/")))
          return
 
       time_string = ""
@@ -254,6 +265,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       fp_threads = set()
 
       if not thread_id: #we want the entire board
+         #here, we want to grab threads for the front page.  if you just grab the first forty it is very likely that some of those will be in the same thread.
+         #so, in order to get 40 threads we keep on pulling posts back in time until we hit 40 bumped threads.
+         #this takes longer if posting is concentrated in a few threads (slow board, someone trying to threadstop)
          offset = 0
          while len(fp_threads) < 40:
             latest.execute("select * from posts where posts.time != 1234 and posts.time < ? order by time desc limit 40 offset ?;", (calendar.timegm(arg_time), offset)) # last 40
@@ -269,6 +283,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          posts = sorted(posts, key=operator.itemgetter(5))
             
       else:
+         #but getting a single thread is fast!
          latest.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time asc;", (thread_id, calendar.timegm(arg_time)))
          posts = latest
 
@@ -295,7 +310,6 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
       # if nothing else, do fp
       s.wfile.write(generate_fp(board))
-      sys.stdout.flush()
       s.wfile.write("</body></html>")
    def log_request(foo,bar):
       pass # no apache style logs
@@ -305,6 +319,8 @@ if __name__ == '__main__':
       server_class = BaseHTTPServer.HTTPServer
       httpd = server_class(('', PORT_NUMBER), MyHandler)
       try:
+         print "Browse to http://localhost:%d/" % PORT_NUMBER 
+         print "It may take 20 seconds or more to generate the front page."
          httpd.serve_forever()
       except KeyboardInterrupt:
          pass
