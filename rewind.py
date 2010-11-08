@@ -262,24 +262,15 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       latest = con.cursor()
       fp_posts = con.cursor()
       posts = []
-      fp_threads = set()
 
       if not thread_id: #we want the entire board
-         #here, we want to grab threads for the front page.  if you just grab the first forty it is very likely that some of those will be in the same thread.
-         #so, in order to get 40 threads we keep on pulling posts back in time until we hit 40 bumped threads.
-         #this takes longer if posting is concentrated in a few threads (slow board, someone trying to threadstop)
-         offset = 0
-         while len(fp_threads) < 40:
-            latest.execute("select * from posts where posts.time != 1234 and posts.time < ? order by time desc limit 40 offset ?;", (calendar.timegm(arg_time), offset)) # last 40
-            for post in latest:
-               fp_posts.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time;", (post[0], calendar.timegm(arg_time)))
-               for fp_post in fp_posts:
-                  post_tbd = [fp_post[0], fp_post[1], fp_post[2], fp_post[3], fp_post[4], fp_post[5], fp_post[6]]
-                  if post_tbd not in posts:
-                     posts.append(post_tbd)
-                  if fp_post[0] not in fp_threads:
-                     fp_threads.add(fp_post[0])
-                     offset += 40
+         latest.execute("select distinct thread from posts where posts.time != 1234 and posts.time < %d order by time desc limit 40;" % calendar.timegm(arg_time)) # last 40
+         for post in latest:
+            fp_posts.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time;", (post[0], calendar.timegm(arg_time)))
+            for fp_post in fp_posts:
+               post_tbd = [fp_post[0], fp_post[1], fp_post[2], fp_post[3], fp_post[4], fp_post[5], fp_post[6]]
+               if post_tbd not in posts:
+                  posts.append(post_tbd)
          posts = sorted(posts, key=operator.itemgetter(5))
             
       else:
