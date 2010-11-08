@@ -183,6 +183,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
          s.wfile.write(global_css)
          return
 
+      #this fixes a bug caused by forgetting a trailing slash
+      if s.path[-1] != "/":
+         s.send_response(301)
+         s.send_header("Location", "http://localhost:%d%s/" % (PORT_NUMBER, s.path))
+         return
+
+
       s.send_response(200)
       s.send_header("Content-type", "text/html")
       s.end_headers()
