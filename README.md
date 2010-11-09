@@ -34,7 +34,7 @@ If you just want to scrape world4ch's /prog/, you can run the script without any
 
 If you run /prog/scrape without any arguments (i.e., `./progscrape.py` or `python2.5 progscrape.py`, if you have several versions of Python installed), it scrapes world4ch's /prog/ through the JSON interface, dropping to the HTML interface to verify any ambiguous tripcodes it comes across. It puts the scraped content into a database called `prog.db`, and it also prints the thread IDs it's working on to standard out as it goes.
 
-If this isn't what you want to do, you can pass it arguments to modify its behaviour. `./progscrape --help` (or the man page) will show you a complete list of options. If you prefer, you can also edit the source code directly; the relevant variables are all at the top of the script.
+If this isn't what you want to do, you can pass it arguments to modify its behavior. `./progscrape --help` (or the man page) will show you a complete list of options. If you prefer, you can also edit the source code directly; the relevant variables are all at the top of the script.
 
 ### Using the scraped content
 
