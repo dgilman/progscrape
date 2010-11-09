@@ -91,6 +91,8 @@ if '--help' in sys.argv or '-h' in sys.argv:
     print "\t\033[1m--help\033[0m"
     print "\t\033[1m-h\033[0m"
     print "\t\tdisplay this message and exit"
+    print 
+    print "\tThis /prog/scrape does not have super \033[1mXarn\033[0m powers."
     print
 
     sys.exit(0)
