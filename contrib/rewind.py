@@ -91,65 +91,61 @@ def generate_fp(board):
    <a name="menu" rev="contents"></a>
 <ul class="threadlistflat" id="threadlist">
 """
-   #top navigation
    x = 0
+   #top navigation
    for thread in board:
-      if x <= 39:
-         fp += """<li class="threadlink">"""
-         fp += """<a href="./read/prog/%d/1-">""" % (thread[0])
-         fp += """%d: </a><a href='#%d'>""" % (x+1, x+1)
-         fp += """%s (%d)</a> </li>""" % (thread[1].title, thread[1].count)
-         x += 1
-      else: pass
+      fp += """<li class="threadlink">"""
+      fp += """<a href="./read/prog/%d/1-">""" % (thread[0])
+      fp += """%d: </a><a href='#%d'>""" % (x+1, x+1)
+      fp += """%s (%d)</a> </li>""" % (thread[1].title, thread[1].count)
+      x += 1
 
    fp += """</ul><br/></div> </div>
 """
 
-   x = 0
+   x = 0 
    for thread in board:
-      if x <= 39:
-        fp += """<div class="border"><a name="%d">""" % (x+1)
-        fp += """</a><div class="thread"><div class="postheader">""" #<span class="navlinks"><a href="prog/#menu">&#9632;</a>&nbsp;<a href="prog/#%d" """ % (x - 1 if x > 1 else 40)
-        #fp += """rel="prev">&#9650;</a>&nbsp;<a href="prog/#%d" """ % (x + 1 if x < 40 else 1)
-        #fp += """rel="next">&#9660;</a></span>"""
-        fp += """<h2><span class="replies">[%d:%d]</span> """ % (x, thread[1].count)
-        fp += """<a name='%d' href='read/prog/%d'>""" % (thread[0], thread[0])
-        fp += """%s</a></h2></div>""" % (thread[1].title)
-        #w4ch seems to think 1 is even and 2 is odd
-        fp += """<div class="post %s">""" % ( "even" if thread[1].posts[0].count % 2 == 1 else "odd") 
-        fp += """<h3><span class="postnum">%d """ % (thread[1].posts[0].count)
-        fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[0].author)
-        fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[0].time)))
-        fp += """</span> <span class="id"> </span></span></h3>"""
-        fp += """<blockquote><p>"""
-        fp += """%s""" % (thread[1].posts[0].body)
-        fp += """</p</blockquote></div>"""
-        if len(thread[1].posts) <= 5:
-           for y in range(1,thread[1].count):
-              fp += """<div class="post %s">""" % ( "even" if thread[1].posts[y].count % 2 == 1 else "odd") 
-              fp += """<h3><span class="postnum">%d """ % (thread[1].posts[y].count)
-              fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[y].author)
-              fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[y].time)))
-              fp += """</span> <span class="id"> </span></span></h3>"""
-              fp += """<blockquote><p>"""
-              fp += """%s""" % (thread[1].posts[y].body)
-              fp += """</blockquote></p></div>"""
-        else:
-           fp += """<p class="hidden">The 5 newest replies are shown below.<br/>"""
-           fp += """<a href="read/prog/%d/">Read this thread from the beginning</a></p>""" % (thread[0])
-           for y in range(len(thread[1].posts)-4,len(thread[1].posts)):
-              fp += """<div class="post %s">""" % ( "even" if thread[1].posts[y].count % 2 == 1 else "odd") 
-              fp += """<h3><span class="postnum">%d """ % (thread[1].posts[y].count)
-              fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[y].author)
-              fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[y].time)))
-              fp += """</span> <span class="id"> </span></span></h3>"""
-              fp += """<blockquote><p>"""
-              fp += """%s""" % (thread[1].posts[y].body)
-              fp += """</blockquote></p></div>"""
-        fp += """<a href="read/prog/%d/">Entire thread</a></p>""" % (thread[0]) 
-        fp += """</div></div>"""
-        x += 1
-      else: pass
+     fp += """<div class="border"><a name="%d">""" % (x+1)
+     fp += """</a><div class="thread"><div class="postheader">""" #<span class="navlinks"><a href="prog/#menu">&#9632;</a>&nbsp;<a href="prog/#%d" """ % (x - 1 if x > 1 else 40)
+     #fp += """rel="prev">&#9650;</a>&nbsp;<a href="prog/#%d" """ % (x + 1 if x < 40 else 1)
+     #fp += """rel="next">&#9660;</a></span>"""
+     fp += """<h2><span class="replies">[%d:%d]</span> """ % (x, thread[1].count)
+     fp += """<a name='%d' href='read/prog/%d'>""" % (thread[0], thread[0])
+     fp += """%s</a></h2></div>""" % (thread[1].title)
+     #w4ch seems to think 1 is even and 2 is odd
+     fp += """<div class="post %s">""" % ( "even" if thread[1].posts[0].count % 2 == 1 else "odd") 
+     fp += """<h3><span class="postnum">%d """ % (thread[1].posts[0].count)
+     fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[0].author)
+     fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[0].time)))
+     fp += """</span> <span class="id"> </span></span></h3>"""
+     fp += """<blockquote><p>"""
+     fp += """%s""" % (thread[1].posts[0].body)
+     fp += """</p</blockquote></div>"""
+     if len(thread[1].posts) <= 5:
+        for y in range(1,thread[1].count):
+           fp += """<div class="post %s">""" % ( "even" if thread[1].posts[y].count % 2 == 1 else "odd") 
+           fp += """<h3><span class="postnum">%d """ % (thread[1].posts[y].count)
+           fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[y].author)
+           fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[y].time)))
+           fp += """</span> <span class="id"> </span></span></h3>"""
+           fp += """<blockquote><p>"""
+           fp += """%s""" % (thread[1].posts[y].body)
+           fp += """</blockquote></p></div>"""
+     else:
+        fp += """<p class="hidden">The 5 newest replies are shown below.<br/>"""
+        fp += """<a href="read/prog/%d/">Read this thread from the beginning</a></p>""" % (thread[0])
+        for y in range(len(thread[1].posts)-4,len(thread[1].posts)):
+           fp += """<div class="post %s">""" % ( "even" if thread[1].posts[y].count % 2 == 1 else "odd") 
+           fp += """<h3><span class="postnum">%d """ % (thread[1].posts[y].count)
+           fp += """</span><span class="postinfo"><span class="namelabel"> Name: </span><span class="postername">%s""" % (thread[1].posts[y].author)
+           fp += """</span><span class="postertrip"></span> : <span class="posterdate">%s""" % (time.strftime("%Y-%m-%d %H:%M", time.gmtime(thread[1].posts[y].time)))
+           fp += """</span> <span class="id"> </span></span></h3>"""
+           fp += """<blockquote><p>"""
+           fp += """%s""" % (thread[1].posts[y].body)
+           fp += """</blockquote></p></div>"""
+     fp += """<a href="read/prog/%d/">Entire thread</a></p>""" % (thread[0]) 
+     fp += """</div></div>"""
+     x += 1
    return fp
 
 
@@ -273,14 +269,18 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       fp_posts = con.cursor()
       posts = []
 
+      #import datetime
+      #start = datetime.datetime.now()
       if not thread_id: #we want the entire board
          latest.execute("select distinct thread from posts where posts.time != 1234 and posts.time < %d order by time desc limit 40;" % calendar.timegm(arg_time)) # last 40
+         #print (datetime.datetime.now() - start)
          for post in latest:
             fp_posts.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time;", (post[0], calendar.timegm(arg_time)))
             for fp_post in fp_posts:
                post_tbd = [fp_post[0], fp_post[1], fp_post[2], fp_post[3], fp_post[4], fp_post[5], fp_post[6]]
                if post_tbd not in posts:
                   posts.append(post_tbd)
+         #print (datetime.datetime.now() - start)
          posts = sorted(posts, key=operator.itemgetter(5))
             
       else:
