@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import time, calendar
 import BaseHTTPServer
 import sqlite3
@@ -30,6 +30,9 @@ if len(args) > 0:
 elif not db_name:
    db_name = "prog.db"
 
+if not os.path.exists(db_name):
+   print "Can't get to the db!"
+   sys.exit(-1)
 
 if FAGGOT_DATES:
    date_format = "%d %m %Y %H %M %S"
