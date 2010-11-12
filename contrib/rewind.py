@@ -11,10 +11,11 @@ import operator
 
 PORT_NUMBER = 8080
 FAGGOT_DATES = False
+TIME = False
 db_name = None
 
 try:
-   optlist, args = getopt(sys.argv[1:], '', ['faggot-dates', 'port='])
+   optlist, args = getopt(sys.argv[1:], '', ['faggot-dates', 'port=', 'time'])
 except:
    print "Bad args!"
    sys.exit(-1)
@@ -24,6 +25,10 @@ for (opt, arg) in optlist:
       FAGGOT_DATES = True
    if opt == '--port':
       PORT_NUMBER = int(arg)
+   if opt == '--time':
+      TIME = True
+
+if TIME: import datetime
 
 if len(args) > 0:
    db_name = args[0]
@@ -157,6 +162,8 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
    def do_GET(s):
       """Respond to a GET request."""
 
+      if TIME: start = datetime.datetime.now()
+
       con = sqlite3.connect(db_name)
 
       arg_list = s.path.split("/")[1:]
@@ -269,24 +276,23 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       fp_posts = con.cursor()
       posts = []
 
-      #import datetime
-      #start = datetime.datetime.now()
       if not thread_id: #we want the entire board
          latest.execute("select distinct thread from posts where posts.time != 1234 and posts.time < %d order by time desc limit 40;" % calendar.timegm(arg_time)) # last 40
-         #print (datetime.datetime.now() - start)
+         if TIME: print "Found FP threads: %s" % (datetime.datetime.now() - start)
          for post in latest:
             fp_posts.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time;", (post[0], calendar.timegm(arg_time)))
             for fp_post in fp_posts:
                post_tbd = [fp_post[0], fp_post[1], fp_post[2], fp_post[3], fp_post[4], fp_post[5], fp_post[6]]
                if post_tbd not in posts:
                   posts.append(post_tbd)
-         #print (datetime.datetime.now() - start)
+         if TIME: print "Got FP posts: %s " % (datetime.datetime.now() - start)
          posts = sorted(posts, key=operator.itemgetter(5))
             
       else:
          #but getting a single thread is fast!
          latest.execute("select * from posts where posts.thread = ? and posts.time != 1234 and posts.time < ? order by time asc;", (thread_id, calendar.timegm(arg_time)))
          posts = latest
+         if TIME: print "Got thread posts: %s" % (datetime.datetime.now() - start)
 
       for post in posts:
          new_post = Post(post[0], post[1], post[2], post[3], post[4], post[5], post[6])
@@ -298,33 +304,38 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             board[post[0]].addpost(new_post)
             board.bump(post[0])
 
+      if TIME: print "Populated board object: %s" % (datetime.datetime.now() - start)
+
       threads = con.cursor()
       threads.execute("select * from threads;")
       for thread in threads:
          if board[thread[0]]:
             board[thread[0]].title = thread[1]
 
+      if TIME: print "Got thread titles: %s" % (datetime.datetime.now() - start)
+
       # catch stuff
       if thread_id != 0:
          s.wfile.write(generate_thread(board))
+         if TIME: print "Thread templated: %s" % (datetime.datetime.now() - start)
          return
 
       # if nothing else, do fp
       s.wfile.write(generate_fp(board))
       s.wfile.write("</body></html>")
+      if TIME: print "FP templated: %s" % (datetime.datetime.now() - start)
+      
    def log_request(foo,bar):
       pass # no apache style logs
 
-
-if __name__ == '__main__':
-      server_class = BaseHTTPServer.HTTPServer
-      httpd = server_class(('', PORT_NUMBER), MyHandler)
-      print "rewind.py [--faggot-dates] [--port=n] [prog.db]"
-      print "Browse to http://localhost:%d/" % PORT_NUMBER
-      print "It may take 20 seconds or more to generate the front page."
-      try:
-         httpd.serve_forever()
-      except KeyboardInterrupt:
-         pass
-      httpd.server_close()
+server_class = BaseHTTPServer.HTTPServer
+httpd = server_class(('', PORT_NUMBER), MyHandler)
+print "rewind.py [--faggot-dates] [--port=n] [prog.db]"
+print "Browse to http://localhost:%d/" % PORT_NUMBER
+print "It may take 20 seconds or more to generate the front page."
+try:
+   httpd.serve_forever()
+except KeyboardInterrupt:
+   pass
+httpd.server_close()
 
