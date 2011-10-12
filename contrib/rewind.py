@@ -332,7 +332,7 @@ server_class = BaseHTTPServer.HTTPServer
 httpd = server_class(('', PORT_NUMBER), MyHandler)
 print "rewind.py [--faggot-dates] [--port=n] [prog.db]"
 print "Browse to http://localhost:%d/" % PORT_NUMBER
-print "It may take 20 seconds or more to generate the front page."
+print "If it's slow add the appropriate index from progscrape.py to your existing prog.db"
 try:
    httpd.serve_forever()
 except KeyboardInterrupt:

@@ -210,8 +210,10 @@ try:
             body TEXT,
             PRIMARY KEY (thread, id)
         )""")
+    db.execute("""
+        create index thread_time_index on posts (thread, time desc)""")
     db_conn.commit()
-    
+
 except sqlite3.DatabaseError:
     # Specified DB file exists, but isn't an SQLite DB file.
     print "Use a different filename for your DB."
